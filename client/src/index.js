@@ -1,15 +1,17 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
+import React from "react";
+import ReactDOM from "react-dom";
+import "./index.css";
+import App from "./App";
 import { BrowserRouter } from "react-router-dom";
-
+import { TodosProvider } from "./context/TodosContext";
 
 ReactDOM.render(
   <React.StrictMode>
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>,
+    <TodosProvider>
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    </TodosProvider>
   </React.StrictMode>,
-  document.getElementById('root')
+  document.getElementById("root")
 );
