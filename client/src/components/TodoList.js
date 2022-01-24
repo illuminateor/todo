@@ -6,7 +6,9 @@ function TodoList() {
   return (
     <>
       {isPending && !todos && <div>Loading todos...</div>}
-      {error && <div>{error}</div>}
+      {error && (
+        <span className="text-red-300 weight font-bold">{error.message}</span>
+      )}
       {todos && todos.map((todo) => <Todo key={todo.id} todo={todo} />)}
     </>
   );

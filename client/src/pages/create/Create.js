@@ -28,7 +28,7 @@ export default function Create() {
 
   const handleAdding = async (e) => {
     e.preventDefault();
-    if (title !== "") {
+    if (!isPending) {
       const formData = new FormData();
       formData.append("title", title);
       formData.append("description", description);
@@ -39,7 +39,6 @@ export default function Create() {
 
       try {
         await dispatch({ type: "ADD_TODO_TO_DB", todo: formData });
-        setTitle("");
         navigate("/");
       } catch (error) {
         console.log(error);
@@ -55,7 +54,9 @@ export default function Create() {
       <Link to="/">
         <h2>Ga terug</h2>
       </Link>
-      {error && <div>There was an error</div>}
+      {error && (
+        <span className="text-red-300 weight font-bold">{error.message}</span>
+      )}
       <form>
         <div className="border-2 rounded-xl hover:shadow-xl bg-gray-100 border-gray-400 flex flex-col p-5 pt-2">
           <label htmlFor="title">Titel</label>
@@ -66,6 +67,13 @@ export default function Create() {
             type="text"
             className="w-auto mb-2"
           />
+          {error?.errors?.title && (
+            <div>
+              <span className="text-red-300 weight font-bold">
+                {error.errors.title[0]}
+              </span>
+            </div>
+          )}
           <label htmlFor="description">Beschrijving</label>
           <textarea
             onChange={(e) => setDescription(e.target.value)}
@@ -94,6 +102,13 @@ export default function Create() {
             onChange={(e) => setImage(e.target.files[0])}
             className="mb-2 border-0"
           />
+          {error?.errors?.image && (
+            <div>
+              <span className="text-red-300 weight font-bold">
+                {error.errors.image[0]}
+              </span>
+            </div>
+          )}
           <div>
             <span>Preview afbeelding</span>
             <img src={preview} alt="" />

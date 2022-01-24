@@ -8,8 +8,8 @@ export default function Edit() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [completed, setCompleted] = useState(false);
-  const [image, setImage] = useState(null);
-  const { dispatch, currentTodo, isPending } = useTodos();
+  const [image, setImage] = useState();
+  const { dispatch, currentTodo, isPending, error } = useTodos();
   let navigate = useNavigate();
   let params = useParams();
   let id = params.id;
@@ -43,15 +43,11 @@ export default function Edit() {
     if (!isPending) {
       const formData = new FormData();
       formData.append("id", currentTodo.id);
-      formData.append("title", title !== "" ? title : currentTodo.title);
-      formData.append(
-        "description",
-        description !== "" ? description : currentTodo.description
-      );
+      formData.append("title", title);
+      formData.append("description", description);
       let newCompleted = completed !== "" ? completed : currentTodo.completed;
       formData.append("completed", newCompleted === false ? "0" : "1");
-
-      if (image) {
+      if (image !== undefined) {
         formData.append("image", image);
       }
 
@@ -64,6 +60,8 @@ export default function Edit() {
     }
   };
 
+  console.log(error);
+
   return (
     <>
       <h1 className="text-lg justify-center align-middle">
@@ -72,6 +70,9 @@ export default function Edit() {
       <Link to="/">
         <h2>Ga terug</h2>
       </Link>
+      {error && (
+        <span className="text-red-300 weight font-bold">{error.message}</span>
+      )}
       {currentTodo && (
         <form>
           <div className="border-2 rounded-xl hover:shadow-xl bg-gray-100 border-gray-400 flex flex-col p-5 pt-2">
@@ -83,6 +84,13 @@ export default function Edit() {
               type="text"
               className="w-auto mb-2"
             />
+            {error?.errors?.title && (
+              <div>
+                <span className="text-red-300 weight font-bold">
+                  {error.errors.title[0]}
+                </span>
+              </div>
+            )}
             <label htmlFor="description">Beschrijving</label>
             <textarea
               onChange={(e) => setDescription(e.target.value)}
@@ -112,6 +120,13 @@ export default function Edit() {
               onChange={(e) => setImage(e.target.files[0])}
               className="mb-2 border-0"
             />
+            {error?.errors?.image && (
+              <div>
+                <span className="text-red-300 weight font-bold">
+                  {error.errors.image[0]}
+                </span>
+              </div>
+            )}
             {preview ? (
               <div>
                 <span>Preview afbeelding</span>

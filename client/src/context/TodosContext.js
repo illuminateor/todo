@@ -77,7 +77,6 @@ const asyncActionHandlers = {
       } catch (error) {
         dispatch({ type: "SET_PENDING", payload: false });
         dispatch({ type: "SET_ERROR", payload: "Er ging iets mis" });
-        console.log(error.message);
       }
     },
   ADD_TODO_TO_DB:
@@ -95,8 +94,7 @@ const asyncActionHandlers = {
         dispatch({ type: "SET_ERROR", payload: null });
       } catch (error) {
         dispatch({ type: "SET_PENDING", payload: false });
-        dispatch({ type: "SET_ERROR", payload: "Er ging iets mis" });
-        console.log(error.message);
+        dispatch({ type: "SET_ERROR", payload: error.response.data });
       }
     },
   REMOVE_TODO_FROM_DB:
@@ -114,7 +112,6 @@ const asyncActionHandlers = {
       } catch (error) {
         dispatch({ type: "SET_PENDING", payload: false });
         dispatch({ type: "SET_ERROR", payload: "Er ging iets mis" });
-        console.log(error.message);
       }
     },
   EDIT_TODO_FROM_DB:
@@ -134,8 +131,7 @@ const asyncActionHandlers = {
         dispatch({ type: "SET_ERROR", payload: null });
       } catch (error) {
         dispatch({ type: "SET_PENDING", payload: false });
-        dispatch({ type: "SET_ERROR", payload: "Er ging iets mis" });
-        console.log(error.message);
+        dispatch({ type: "SET_ERROR", payload: error.response.data });
       }
     },
   TOGGLE_COMPLETED_TO_DB:
@@ -155,7 +151,6 @@ const asyncActionHandlers = {
         dispatch({ type: "SET_ERROR", payload: null });
       } catch (error) {
         dispatch({ type: "SET_ERROR", payload: "Er ging iets mis" });
-        console.log(error.message);
       }
     }
 };
