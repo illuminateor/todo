@@ -16,7 +16,7 @@ class TodoItemFactory extends Factory
         return [
             'title' => $this->faker->word(),
             'description' => $this->faker->sentence(),
-            'image' => 'placeholder.jpg',
+            'image' => '',
             'completed' => $this->faker->boolean()
         ];
     }
