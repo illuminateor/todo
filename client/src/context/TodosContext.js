@@ -1,4 +1,4 @@
-import { createContext, useReducer, useEffect } from "react";
+import { createContext, useEffect } from "react";
 import { useReducerAsync } from "use-reducer-async";
 import axios from "axios";
 
@@ -8,8 +8,6 @@ export const TodosContext = createContext({
   isPending: false,
   error: null,
   initiliazeTodos: () => {},
-  addTodo: () => {},
-  removeTodo: () => {},
   editTodo: () => {}
 });
 
@@ -77,7 +75,8 @@ const asyncActionHandlers = {
         dispatch({ type: "SET_CURRENT_TODO", payload: data });
         dispatch({ type: "SET_ERROR", payload: null });
       } catch (error) {
-        dispatch({ type: "SET_ERROR", payload: "Something went wrong" });
+        dispatch({ type: "SET_PENDING", payload: false });
+        dispatch({ type: "SET_ERROR", payload: "Er ging iets mis" });
         console.log(error.message);
       }
     },
@@ -95,7 +94,8 @@ const asyncActionHandlers = {
         dispatch({ type: "ADD_TODO", payload: data });
         dispatch({ type: "SET_ERROR", payload: null });
       } catch (error) {
-        dispatch({ type: "SET_ERROR", payload: "Something went wrong" });
+        dispatch({ type: "SET_PENDING", payload: false });
+        dispatch({ type: "SET_ERROR", payload: "Er ging iets mis" });
         console.log(error.message);
       }
     },
@@ -112,17 +112,19 @@ const asyncActionHandlers = {
         dispatch({ type: "REMOVE_TODO", payload: action.id });
         dispatch({ type: "SET_ERROR", payload: null });
       } catch (error) {
-        dispatch({ type: "SET_ERROR", payload: "Something went wrong" });
+        dispatch({ type: "SET_PENDING", payload: false });
+        dispatch({ type: "SET_ERROR", payload: "Er ging iets mis" });
         console.log(error.message);
       }
     },
   EDIT_TODO_FROM_DB:
     ({ dispatch, getState, signal }) =>
     async (action) => {
+      console.log("action.todo", action.todo.get("id"));
       dispatch({ type: "SET_PENDING", payload: true });
       try {
-        const res = await axios.put(
-          `http://localhost:8000/api/todo-items/${action.todo.id}`,
+        const res = await axios.post(
+          `http://localhost:8000/api/todo-items/${action.todo.get("id")}`,
           action.todo
         );
         const { data } = res.data;
@@ -131,7 +133,28 @@ const asyncActionHandlers = {
         dispatch({ type: "EDIT_TODO", payload: data });
         dispatch({ type: "SET_ERROR", payload: null });
       } catch (error) {
-        dispatch({ type: "SET_ERROR", payload: "Something went wrong" });
+        dispatch({ type: "SET_PENDING", payload: false });
+        dispatch({ type: "SET_ERROR", payload: "Er ging iets mis" });
+        console.log(error.message);
+      }
+    },
+  TOGGLE_COMPLETED_TO_DB:
+    ({ dispatch, getState, signal }) =>
+    async (action) => {
+      dispatch({ type: "SET_PENDING", payload: true });
+      console.log("action.todo", action.todo);
+      try {
+        const res = await axios.put(
+          `http://localhost:8000/api/todo-items/${action.todo.id}/complete`,
+          action.todo
+        );
+        const { data } = res.data;
+        dispatch({ type: "SET_PENDING", payload: false });
+
+        dispatch({ type: "EDIT_TODO", payload: data });
+        dispatch({ type: "SET_ERROR", payload: null });
+      } catch (error) {
+        dispatch({ type: "SET_ERROR", payload: "Er ging iets mis" });
         console.log(error.message);
       }
     }
@@ -148,20 +171,9 @@ export function TodosProvider({ children }) {
     },
     asyncActionHandlers
   );
-  // const [state, dispatch] = useReducer(todosReducer, );
-
   const initiliazeTodos = (todos) => {
     dispatch({ type: "LOAD_TODOS", payload: todos });
   };
-
-  const addTodo = (todo) => {
-    dispatch({ type: "ADD_TODO", payload: todo });
-  };
-
-  const removeTodo = (id) => {
-    dispatch({ type: "REMOVE_TODO", payload: id });
-  };
-
   const setIsPending = (status) => {
     dispatch({ type: "SET_PENDING", payload: status });
   };
@@ -207,8 +219,6 @@ export function TodosProvider({ children }) {
         ...state,
         dispatch,
         initiliazeTodos,
-        addTodo,
-        removeTodo,
         editTodo,
         setIsPending,
         setError

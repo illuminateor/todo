@@ -1,8 +1,7 @@
 import { useTodos } from "../hooks/useTodos";
 import Todo from "./Todo";
 function TodoList() {
-  const { todos, dispatch, isPending, error, editTodo, removeTodo } =
-    useTodos();
+  const { todos, isPending, error } = useTodos();
 
   return (
     <>

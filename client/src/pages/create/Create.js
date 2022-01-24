@@ -1,6 +1,6 @@
 import { faSpinner } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTodos } from "../../hooks/useTodos";
 
@@ -8,21 +8,37 @@ export default function Create() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [completed, setCompleted] = useState(false);
-  const [image, setImage] = useState("");
-  const { dispatch, isPending } = useTodos();
+  const [image, setImage] = useState();
+  const { dispatch, isPending, error } = useTodos();
   let navigate = useNavigate();
+
+  const [preview, setPreview] = useState();
+
+  useEffect(() => {
+    if (image === undefined) {
+      setPreview(undefined);
+      return;
+    }
+
+    const objectUrl = URL.createObjectURL(image);
+    setPreview(objectUrl);
+
+    return () => URL.revokeObjectURL(objectUrl);
+  }, [image]);
 
   const handleAdding = async (e) => {
     e.preventDefault();
     if (title !== "") {
-      let todo = {
-        title,
-        description,
-        image,
-        completed
-      };
+      const formData = new FormData();
+      formData.append("title", title);
+      formData.append("description", description);
+      if (image !== undefined) {
+        formData.append("image", image);
+      }
+      formData.append("completed", completed === false ? "0" : "1");
+
       try {
-        await dispatch({ type: "ADD_TODO_TO_DB", todo });
+        await dispatch({ type: "ADD_TODO_TO_DB", todo: formData });
         setTitle("");
         navigate("/");
       } catch (error) {
@@ -39,6 +55,7 @@ export default function Create() {
       <Link to="/">
         <h2>Ga terug</h2>
       </Link>
+      {error && <div>There was an error</div>}
       <form>
         <div className="border-2 rounded-xl hover:shadow-xl bg-gray-100 border-gray-400 flex flex-col p-5 pt-2">
           <label htmlFor="title">Titel</label>
@@ -72,11 +89,15 @@ export default function Create() {
           <label htmlFor="image">Afbeelding</label>
           <input
             type="file"
-            name=""
+            name="image"
             id="image"
-            onChange={(e) => setImage(e.target.value)}
-            className="mb-2 text-white border-0"
+            onChange={(e) => setImage(e.target.files[0])}
+            className="mb-2 border-0"
           />
+          <div>
+            <span>Preview afbeelding</span>
+            <img src={preview} alt="" />
+          </div>
           <button
             onClick={handleAdding}
             type="submit"

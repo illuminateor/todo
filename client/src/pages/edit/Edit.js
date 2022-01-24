@@ -8,8 +8,8 @@ export default function Edit() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [completed, setCompleted] = useState(false);
-  const [image, setImage] = useState("");
-  const { dispatch, todos, currentTodo, isPending } = useTodos();
+  const [image, setImage] = useState(null);
+  const { dispatch, currentTodo, isPending } = useTodos();
   let navigate = useNavigate();
   let params = useParams();
   let id = params.id;
@@ -24,19 +24,39 @@ export default function Edit() {
     }
   }, [id]);
 
+  const [preview, setPreview] = useState();
+
+  useEffect(() => {
+    if (!image) {
+      setPreview(undefined);
+      return;
+    }
+
+    const objectUrl = URL.createObjectURL(image);
+    setPreview(objectUrl);
+
+    return () => URL.revokeObjectURL(objectUrl);
+  }, [image]);
+
   const handleEdit = async (e) => {
     e.preventDefault();
     if (!isPending) {
-      let todo = {
-        id: currentTodo.id,
-        title: title !== "" ? title : currentTodo.title,
-        description: description !== "" ? description : currentTodo.description,
-        image: image !== "" ? image : currentTodo.image,
-        completed: completed !== "" ? completed : currentTodo.completed
-      };
+      const formData = new FormData();
+      formData.append("id", currentTodo.id);
+      formData.append("title", title !== "" ? title : currentTodo.title);
+      formData.append(
+        "description",
+        description !== "" ? description : currentTodo.description
+      );
+      let newCompleted = completed !== "" ? completed : currentTodo.completed;
+      formData.append("completed", newCompleted === false ? "0" : "1");
+
+      if (image) {
+        formData.append("image", image);
+      }
+
       try {
-        await dispatch({ type: "EDIT_TODO_FROM_DB", todo });
-        setTitle("");
+        await dispatch({ type: "EDIT_TODO_FROM_DB", todo: formData });
         navigate("/");
       } catch (error) {
         console.log(error);
@@ -87,11 +107,25 @@ export default function Edit() {
             <label htmlFor="image">Afbeelding</label>
             <input
               type="file"
-              name=""
+              name="image"
               id="image"
-              onChange={(e) => setImage(e.target.value)}
-              className="mb-2 text-white border-0"
+              onChange={(e) => setImage(e.target.files[0])}
+              className="mb-2 border-0"
             />
+            {preview ? (
+              <div>
+                <span>Preview afbeelding</span>
+                <img src={preview} alt="" />
+              </div>
+            ) : (
+              <div>
+                <span>Huidige afbeelding</span>
+                <img
+                  src={`http://localhost:8000/storage/images/${currentTodo.image}`}
+                  alt=""
+                />
+              </div>
+            )}
             <button
               onClick={handleEdit}
               type="submit"

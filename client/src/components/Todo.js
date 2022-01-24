@@ -16,8 +16,8 @@ export default function Todo({ todo }) {
   const handleCompleted = (e) => {
     setCurrentPending(true);
     dispatch({
-      type: "EDIT_TODO_FROM_DB",
-      todo: { ...todo, completed: e.target.checked }
+      type: "TOGGLE_COMPLETED_TO_DB",
+      todo: { id: todo.id, completed: e.target.checked }
     });
   };
 
@@ -26,7 +26,7 @@ export default function Todo({ todo }) {
     bgColor = "bg-green-50 border-green-400";
   }
 
-  let containerClasses = `flex justify-around items-center border-2 rounded-xl hover:shadow-xl ${bgColor}`;
+  let containerClasses = `px-2 flex justify-around items-center border-2 rounded-xl hover:shadow-xl ${bgColor}`;
 
   let title = todo.title;
 
@@ -45,19 +45,22 @@ export default function Todo({ todo }) {
 
   return (
     <div className={containerClasses}>
-      <img
-        src="/logo192.png"
-        alt=""
-        height="20px"
-        width="50px"
-        className="mx-2"
-      />
       <input
         type="checkbox"
         checked={todo.completed}
         className="cursor-pointer mr-2"
         onChange={handleCompleted}
-        style={{ transform: "scale(1.5)" }}
+      />
+      <img
+        src={
+          todo.image !== ""
+            ? `http://localhost:8000/storage/images/${todo.image}`
+            : "/logo192.png"
+        }
+        alt=""
+        height="20px"
+        width="50px"
+        className="mx-2"
       />
       <div className="flex flex-col justify-between grow">
         <Link to={`/details/${todo.id}`}>
@@ -69,7 +72,7 @@ export default function Todo({ todo }) {
           </button>
         </Link>
       </div>
-      <div className="flex flex-col justify-evenly p-2 mr-2">
+      <div className="flex flex-col justify-evenly py-2 pl-2">
         <Link to={`/edit/${todo.id}`}>
           <button className="bg-blue-200 px-5 py-1 hover:bg-blue-300">
             <FontAwesomeIcon icon={faEdit} />
